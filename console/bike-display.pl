@@ -64,8 +64,6 @@ local $SIG{INT} = sub { $running = undef; };
 STDOUT->autoflush(1);
 
 while ($running) {
-  last unless $reader->is_running;
-
   if (time - $last_rev > $TIMEOUT) {
     debug 'Pedalling stopped';
     $rpm = 0;
@@ -80,15 +78,19 @@ while ($running) {
 
   $time++ if $rpm > 0;
 
+  last unless $reader->is_running;
+
   sleep 1;
 }
 
 $reader->detach();
 
-my $avg_mph = $dist / $time * 3600;
+print "\n";
 
-print "\n\nRide summary:\n";
-printf "Total distance: %.2f mi\n", $dist;
-printf "Average speed:  %.1f MPH\n", $dist / $time * 3600;
-printf "Maximum speed:  %.1f MPH\n", $max_mph;
-printf "Total time:     %s\n", tstring($time);
+if ($time > 0) {
+  print "\nRide summary:\n";
+  printf "Total distance: %.2f mi\n", $dist;
+  printf "Average speed:  %.1f MPH\n", $dist / $time * 3600;
+  printf "Maximum speed:  %.1f MPH\n", $max_mph;
+  printf "Total time:     %s\n", tstring($time);
+}
