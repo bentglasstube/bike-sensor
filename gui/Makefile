@@ -14,16 +14,20 @@ run: $(EXECUTABLE)
 
 app: BikeStats.app
 
-BikeStats.app: $(EXECUTABLE) launcher sprites.bmp Info.plist
+BikeStats.app: $(EXECUTABLE) launcher sprites.bmp Info.plist icon.icns
 	rm -rf BikeStats.app
-	mkdir -p BikeStats.app/Contents/{MacOS,Frameworks/Resources}
+	mkdir -p BikeStats.app/Contents/{MacOS,Frameworks,Resources}
 	cp $(EXECUTABLE) BikeStats.app/Contents/MacOS/exec
 	cp launcher BikeStats.app/Contents/MacOS/launcher
 	cp sprites.bmp BikeStats.app/Contents/MacOS/sprites.bmp
 	cp Info.plist BikeStats.app/Contents/Info.plist
 	cp -R /Library/Frameworks/SDL2.framework BikeStats.app/Contents/Frameworks/SDL2.framework
+	cp icon.icns BikeStats.app/Contents/Resources/icon.icns
+
+icon.icns: icon.iconset/*
+	iconutil -c icns -o $@ icon.iconset
 
 clean:
-	rm -rf $(EXECUTABLE)
+	rm -rf $(EXECUTABLE) BikeStats.app icon.icns
 
 .PHONY: all app run clean
