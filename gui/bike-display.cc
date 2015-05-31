@@ -8,16 +8,20 @@
 #include <boost/format.hpp>
 #include <SDL2/sdl.h>
 
-static const int         WIDTH     = 32 * 6;
-static const int         HEIGHT    = 64 * 3;
-static const int         WHEEL_DIA = 16;
-static const float       PI        = 3.14159265358979f;
-static const int         TIMEOUT   = 3000;
-static const std::string SERIAL    = "/dev/cu.usbmodem12341";
+static const int   WIDTH        = 32 * 6;
+static const int   HEIGHT       = 64 * 3;
+static const int   WHEEL_DIA    = 16;
+static const int   TIMEOUT      = 3000;
+static const float PI           = 3.14159265358979f;
+static const float DIST_PER_REV = WHEEL_DIA * PI / 5280 / 12;
+static const float VELO_FALLOFF = 0.0005f;
+
+// TODO pass at runtime
+static const std::string SERIAL = "/dev/cu.usbmodem12341";
 
 struct Stats {
-  float mph, dist, time;
-  unsigned long last_rev;
+  float dist, time, velo;
+  unsigned long last_rev, next_rev;
 };
 
 void draw_text(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, std::string text) {
@@ -56,7 +60,7 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture, Stats* stats) {
 
   long sec = lroundf(stats->time);
 
-  draw_text(renderer, texture, 0, 0, boost::str(boost::format("%4.1f") % stats->mph));
+  draw_text(renderer, texture, 0, 0, boost::str(boost::format("%4.1f") % stats->velo));
   draw_text(renderer, texture, 0, 64, boost::str(boost::format("%5.2f") % stats->dist));
   draw_text(renderer, texture, 0, 128, boost::str(boost::format("%u:%02u:%02u") % (sec / 3600) % ((sec / 60) % 60) % (sec % 60)));
 
@@ -71,10 +75,22 @@ void handle_rev(int rpm, Stats* stats) {
   long elapsed = current - stats->last_rev;
 
   if (elapsed < TIMEOUT) {
-    stats->mph   = rpm * WHEEL_DIA * PI * 60 / 5280 / 12;
-    stats->dist += WHEEL_DIA * PI / 5280 / 12;
+    stats->dist += DIST_PER_REV;
+    stats->velo = rpm * 60 * DIST_PER_REV;
+
+    std::cerr << "Revolution!  v:" << stats->velo << std::endl;
+
+    if (stats->velo > 0.0f) {
+      float next = DIST_PER_REV / stats->velo;
+      std::cerr << "Next rev in " << (next * 3600) << " seconds" << std::endl;
+      stats->next_rev = current + lroundf(next * 3600000);
+    } else {
+      stats->next_rev = 0;
+    }
+
   } else {
-    stats->mph = 0;
+    stats->velo = 0;
+    std::cerr << "Timeout!" << std::endl;
   }
 
   stats->last_rev = current;
@@ -98,7 +114,7 @@ int main() {
 
   long last_tick = 0;
 
-  Stats stats = { 0.0f, 0.0f, 0, 0 };
+  Stats stats = { 0.0f, 0.0f, 0.0f, 0, 0 };
   char buffer[256];
 
   while (running) {
@@ -110,7 +126,7 @@ int main() {
 
     if (bytes > 0) {
       int rpm = atoi(buffer);
-      fprintf(stderr, "Got rpm %u\n", rpm);
+      std::cerr << "Got RPM " << rpm << std::endl;
       handle_rev(rpm, &stats);
     } else if (bytes == 0) {
       std::cerr << "EOF on serial device" << std::endl;
@@ -121,13 +137,16 @@ int main() {
     }
 
     long current = SDL_GetTicks();
-    long elapsed_tick = current - last_tick;
-    long elapsed_rev = current - stats.last_rev;
+    long elapsed = current - last_tick;
 
-    if (elapsed_rev > TIMEOUT) stats.mph = 0.0f;
-    if (stats.mph > 0) stats.time += elapsed_tick / 1000.0f;
+    if (stats.velo > 0.0f) stats.time += elapsed / 1000.0f;
 
     last_tick = current;
+
+    if (current > stats.next_rev) {
+      stats.velo -= VELO_FALLOFF;
+      if (stats.velo < 0.0f) stats.velo = 0.0f;
+    }
 
     draw(renderer, texture, &stats);
   }
