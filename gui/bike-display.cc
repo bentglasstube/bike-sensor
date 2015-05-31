@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 
 #include <fcntl.h>
@@ -78,11 +77,11 @@ void handle_rev(int rpm, Stats* stats) {
     stats->dist += DIST_PER_REV;
     stats->velo = rpm * 60 * DIST_PER_REV;
 
-    std::cerr << "Revolution!  v:" << stats->velo << std::endl;
+    fprintf(stderr, "Revolution!  v:%.2f\n", stats->velo);
 
     if (stats->velo > 0.0f) {
       float next = DIST_PER_REV / stats->velo;
-      std::cerr << "Next rev in " << (next * 3600) << " seconds" << std::endl;
+      fprintf(stderr, "Next rev in %.3f seconds\n", next * 3600);
       stats->next_rev = current + lroundf(next * 3600000);
     } else {
       stats->next_rev = 0;
@@ -90,7 +89,7 @@ void handle_rev(int rpm, Stats* stats) {
 
   } else {
     stats->velo = 0;
-    std::cerr << "Timeout!" << std::endl;
+    fprintf(stderr, "Timeout!\n");
   }
 
   stats->last_rev = current;
@@ -108,7 +107,7 @@ int main() {
 
   int serial = open(SERIAL.c_str(), O_RDONLY | O_NONBLOCK);
   if (serial == -1) {
-    std::cerr << "Error opening serial device";
+    fprintf(stderr, "Error opening serial device %s: %u\n", SERIAL.c_str(), errno);
     return -1;
   }
 
@@ -126,13 +125,13 @@ int main() {
 
     if (bytes > 0) {
       int rpm = atoi(buffer);
-      std::cerr << "Got RPM " << rpm << std::endl;
+      fprintf(stderr, "Got RPM %u\n", rpm);
       handle_rev(rpm, &stats);
     } else if (bytes == 0) {
-      std::cerr << "EOF on serial device" << std::endl;
+      fprintf(stderr, "EOF on serial device\n");
       break;
     } else if (errno != EAGAIN) {
-      std::cerr << "Error reading from serial device: " << errno << std::endl;
+      fprintf(stderr, "Error reading from serial device: %u\n", errno);
       break;
     }
 
