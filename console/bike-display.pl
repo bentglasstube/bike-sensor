@@ -20,7 +20,10 @@ my $time : shared     = 0;
 my $last_rev : shared = 0;
 my $rpm : shared      = 0;
 
-sub debug { print STDERR @_, "\n" if $VERBOSE; }
+sub debug {
+  my ($message) = @_;
+  print STDERR $message, "\n" if $VERBOSE;
+}
 
 my $reader = threads->create(
   sub {
