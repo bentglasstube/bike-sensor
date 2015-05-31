@@ -137,8 +137,8 @@ int main() {
       break;
     }
 
-    long current = SDL_GetTicks();
-    long elapsed = current - last_tick;
+    unsigned long current = SDL_GetTicks();
+    unsigned long elapsed = current - last_tick;
 
     if (stats.velo > 0.0f) stats.time += elapsed / 1000.0f;
 
