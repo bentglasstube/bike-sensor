@@ -28,7 +28,7 @@ little display that came with the FitDesk.
 ### GUI
 
 The last part of the suite is a GUI application to do much the same
-stuff as the console version.  This is not yet implemented.
+stuff as the console version, but with pretty graphics.
 
 ## License
 
