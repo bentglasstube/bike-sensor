@@ -6,12 +6,12 @@ A suite of programs for capturing data from an exercise bike.
 
 ### Arduino
 
-The first item in this suite is an Arduino program for reading pulses
-from an exercise bike.  It was designed for the [FitDesk v2.0 Desk
-Exercise Bike](fitdesk) because that is the bike that I have, but it
-should be fairly easy to make it work with any other bike that uses a
-similar method to track revolutions.  It'd probably be pretty easy to
-implement on a normal bike with a trainer as well.
+The first item in this suite is an Arduino program for reading pulses from an
+exercise bike.  It was designed for the [FitDesk v2.0 Desk Exercise
+Bike][fitdesk] (full disclosure, this is an affilliate link) because that is
+the bike that I have, but it should be fairly easy to make it work with any
+other bike that uses a similar method to track revolutions.  It'd probably be
+pretty easy to implement on a normal bike with a trainer as well.
 
 The FitDesk uses a 3.5mm headphone connector which has its single
 channel shorted to ground once per revolution.  The controller reads in
@@ -34,7 +34,6 @@ stuff as the console version.  This is not yet implemented.
 
 This code is licensed under the MIT license.  You may use it as you see
 fit, as long as the copyright notice is maintained.  See the
-[LICENSE](license) file for details.
+[LICENSE](LICENSE) file for details.
 
-[fitdesk]: http://www.amazon.com/gp/product/B00CM9CBZY/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00CM9CBZY&linkCode=as2&tag=eatabrick07-20&linkId=FDIVQ7JAOKBK75WD
-[license]: https://www.github.com/bentglasstube/bike-sensor/tree/master/LICENSE
+[fitdesk]: http://amzn.to/1FUSVqc
