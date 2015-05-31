@@ -34,7 +34,9 @@ my $reader = threads->create(
       return;
     }
 
-    while (defined(my $line = $bike->getline())) {
+    while (1) {
+      my $line = $bike->getline() or next;
+
       chomp $line;
       debug "Got data $line";
 
@@ -45,8 +47,6 @@ my $reader = threads->create(
 
       $dist += $WHEEL_DIA * $PI / 5280 / 12;
     }
-
-    print "\nDevice closed";
   }
 );
 
