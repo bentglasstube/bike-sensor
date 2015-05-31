@@ -16,13 +16,21 @@ my $VERBOSE   = 0;
 my $PI = 3.14159265358979;
 
 my $dist : shared     = 0;
-my $time : shared     = 0;
 my $last_rev : shared = 0;
 my $rpm : shared      = 0;
+
+my $time    = 0;
+my $max_mph = 0;
 
 sub debug {
   my ($message) = @_;
   print STDERR $message, "\n" if $VERBOSE;
+}
+
+sub tstring {
+  my ($seconds) = @_;
+
+  sprintf '%u:%02u:%02u', $seconds / 3600, ($seconds / 60) % 60, $seconds % 60;
 }
 
 my $reader = threads->create(
@@ -64,13 +72,10 @@ while ($running) {
   }
 
   my $mph = $rpm * $WHEEL_DIA * $PI * 60 / 5280 / 12;
-
-  my $hr  = $time / 3600;
-  my $min = ($time / 60) % 60;
-  my $sec = $time % 60;
+  $max_mph = $mph if $mph > $max_mph;
 
   print "\r" unless $VERBOSE;
-  printf '%.1f MPH | %.2f mi | %1u:%02u:%02u', $mph, $dist, $hr, $min, $sec;
+  printf '%.1f MPH | %.2f mi | %s     ', $mph, $dist, tstring($time);
   print "\n" if $VERBOSE;
 
   $time++ if $rpm > 0;
@@ -80,4 +85,10 @@ while ($running) {
 
 $reader->detach();
 
-print "\nHave a nice day.\n";
+my $avg_mph = $dist / $time * 3600;
+
+print "\n\nRide summary:\n";
+printf "Total distance: %.2f mi\n", $dist;
+printf "Average speed:  %.1f MPH\n", $dist / $time * 3600;
+printf "Maximum speed:  %.1f MPH\n", $max_mph;
+printf "Total time:     %s\n", tstring($time);
