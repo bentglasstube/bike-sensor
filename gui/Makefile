@@ -1,6 +1,6 @@
-CC=clang++
-CFLAGS=-g --std=c++03 -Wall -Wextra
-LDLIBS=`sdl2-config --cflags --libs`
+CC=clang
+CFLAGS=-O -Wall -Wextra
+LDLIBS=-lm `sdl2-config --cflags --libs`
 
 EXECUTABLE=bike-display
 

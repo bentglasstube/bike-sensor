@@ -1,11 +1,8 @@
-#include <string>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <unistd.h>
 
-#include <boost/format.hpp>
 #include <SDL2/SDL.h>
 
 static const int   WIDTH        = 32 * 6;
@@ -24,21 +21,21 @@ struct Stats {
   unsigned long last_rev, next_rev;
 };
 
-void draw_text(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, std::string text) {
+void draw_text(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, char* text) {
   SDL_Rect source = { 0, 0, 0, 64 };
   SDL_Rect dest   = { x, y, 0, 64 };
 
-  for (std::string::iterator i = text.begin(); i != text.end(); ++i) {
-    if ((*i) >= '0' && (*i) <= '9') {
-      source.x = ((*i) - '/') * 32;
+  for (int i = 0; text[i] != 0; ++i) {
+    if (text[i] >= '0' && text[i] <= '9') {
+      source.x = (text[i] - '/') * 32;
       source.w = dest.w = 32;
-    } else if ((*i) == ' ') {
+    } else if (text[i] == ' ') {
       source.x = 0;
       source.w = dest.w = 32;
-    } else if ((*i) == ':') {
+    } else if (text[i] == ':') {
       source.x = 352;
       source.w = dest.w = 16;
-    } else if ((*i) == '.') {
+    } else if (text[i] == '.') {
       source.x = 368;
       source.w = dest.w = 16;
     }
@@ -58,11 +55,17 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture, Stats* stats) {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  long sec = lroundf(stats->time);
+  unsigned int sec = roundf(stats->time);
+  char buffer[20] = "";
 
-  draw_text(renderer, texture, 0, 0, boost::str(boost::format("%4.1f") % stats->velo));
-  draw_text(renderer, texture, 0, 64, boost::str(boost::format("%5.2f") % stats->dist));
-  draw_text(renderer, texture, 0, 128, boost::str(boost::format("%u:%02u:%02u") % (sec / 3600) % ((sec / 60) % 60) % (sec % 60)));
+  sprintf(buffer, "%4.1f", stats->velo);
+  draw_text(renderer, texture, 0, 0, buffer);
+
+  sprintf(buffer, "%5.2f", stats->dist);
+  draw_text(renderer, texture, 0, 64, buffer);
+
+  sprintf(buffer, "%u:%02u:%02u", sec / 3600, (sec / 60) % 60, sec % 60);
+  draw_text(renderer, texture, 0, 128, buffer);
 
   draw_rect(renderer, texture, 132, 0, 384, 0, 64, 64);
   draw_rect(renderer, texture, 160, 64, 448, 0, 32, 64);
@@ -106,9 +109,9 @@ int main() {
   SDL_Event event;
   bool running = true;
 
-  int serial = open(SERIAL.c_str(), O_RDONLY | O_NONBLOCK);
+  int serial = open(SERIAL, O_RDONLY | O_NONBLOCK);
   if (serial == -1) {
-    fprintf(stderr, "Error opening serial device %s: %u\n", SERIAL.c_str(), errno);
+    fprintf(stderr, "Error opening serial device %s: %u\n", SERIAL, errno);
     return -1;
   }
 
