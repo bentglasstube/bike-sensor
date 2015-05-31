@@ -1,11 +1,12 @@
 #include <string>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <unistd.h>
 
 #include <boost/format.hpp>
-#include <SDL2/sdl.h>
+#include <SDL2/SDL.h>
 
 static const int   WIDTH        = 32 * 6;
 static const int   HEIGHT       = 64 * 3;
@@ -128,8 +129,9 @@ int main() {
       fprintf(stderr, "Got RPM %u\n", rpm);
       handle_rev(rpm, &stats);
     } else if (bytes == 0) {
-      fprintf(stderr, "EOF on serial device\n");
-      break;
+      // ignore this and continue
+      // fprintf(stderr, "EOF on serial device\n");
+      // break;
     } else if (errno != EAGAIN) {
       fprintf(stderr, "Error reading from serial device: %u\n", errno);
       break;
