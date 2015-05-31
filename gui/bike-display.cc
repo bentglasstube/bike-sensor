@@ -14,7 +14,7 @@ static const float DIST_PER_REV = WHEEL_DIA * PI / 5280 / 12;
 static const float VELO_FALLOFF = 0.0005f;
 
 // TODO pass at runtime
-static const std::string SERIAL = "/dev/cu.usbmodem12341";
+static const char* SERIAL = "/dev/cu.usbmodem12341";
 
 struct Stats {
   float dist, time, velo;
