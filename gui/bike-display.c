@@ -16,10 +16,10 @@ static const float VELO_FALLOFF = 0.0005f;
 // TODO pass at runtime
 static const char* SERIAL = "/dev/cu.usbmodem12341";
 
-struct Stats {
+typedef struct {
   float dist, time, velo;
   unsigned long last_rev, next_rev;
-};
+} Stats;
 
 void draw_text(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, char* text) {
   SDL_Rect source = { 0, 0, 0, 64 };
@@ -107,7 +107,7 @@ int main() {
   SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
   SDL_Event event;
-  bool running = true;
+  int running = 1;
 
   int serial = open(SERIAL, O_RDONLY | O_NONBLOCK);
   if (serial == -1) {
@@ -120,9 +120,9 @@ int main() {
   Stats stats = { 0.0f, 0.0f, 0.0f, 0, 0 };
   char buffer[256];
 
-  while (running) {
+  while (running == 1) {
     while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) running = false;
+      if (event.type == SDL_QUIT) running = 0;
     }
 
     ssize_t bytes = read(serial, buffer, 256);

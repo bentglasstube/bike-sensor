@@ -6,7 +6,7 @@ EXECUTABLE=bike-display
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): bike-display.cc
+$(EXECUTABLE): bike-display.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
 
 run: $(EXECUTABLE)
