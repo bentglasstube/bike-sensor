@@ -143,9 +143,14 @@ int main() {
     unsigned long current = SDL_GetTicks();
     unsigned long elapsed = current - last_tick;
 
-    if (stats.velo > 0.0f) stats.time += elapsed / 1000.0f;
+    // artificial slowdown to save battery
+    if (elapsed < 64) {
+      SDL_Delay(64 - elapsed);
+      current = SDL_GetTicks();
+      elapsed = current - last_tick;
+    }
 
-    last_tick = current;
+    if (stats.velo > 0.0f) stats.time += elapsed / 1000.0f;
 
     if (current > stats.next_rev) {
       stats.velo -= VELO_FALLOFF;
@@ -153,6 +158,7 @@ int main() {
     }
 
     draw(renderer, texture, &stats);
+    last_tick = current;
   }
 
   SDL_DestroyTexture(texture);
